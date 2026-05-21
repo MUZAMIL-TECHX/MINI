@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALI RAZA BOT — Pair</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      :root {
+        --bg: #0a0a0f;
+        --surface: #111118;
+        --border: rgba(255,255,255,0.07);
+        --accent: #7c3aed;
+        --accent-glow: rgba(124,58,237,0.35);
+        --accent2: #06b6d4;
+        --text: #f1f1f6;
+        --muted: #6b7280;
+        --success: #10b981;
+        --error: #ef4444;
+        --warn: #f59e0b;
+      }
+
+      body {
+        background: var(--bg);
+        font-family: 'Inter', sans-serif;
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      /* Ambient glow */
+      body::before {
+        content: '';
+        position: fixed;
+        top: -30%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 600px;
+        height: 400px;
+        background: radial-gradient(ellipse, rgba(124,58,237,0.15) 0%, transparent 70%);
+        pointer-events: none;
+      }
+
+      /* Subtle grid */
+      body::after {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+        background-size: 60px 60px;
+        pointer-events: none;
+      }
+
+      .card {
+        position: relative;
+        z-index: 1;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 40px 36px;
+        width: 100%;
+        max-width: 440px;
+        box-shadow:
+          0 0 0 1px rgba(124,58,237,0.1),
+          0 24px 48px rgba(0,0,0,0.5),
+          0 0 80px var(--accent-glow);
+        transition: box-shadow 0.3s ease;
+      }
+
+      /* Top accent bar */
+      .card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 20px; right: 20px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent);
+        border-radius: 0 0 4px 4px;
+      }
+
+      /* Logo / Brand */
+      .brand {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 32px;
+      }
+
+      .brand-icon {
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, var(--accent), var(--accent2));
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        box-shadow: 0 8px 24px var(--accent-glow);
+      }
+
+      .brand-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        background: linear-gradient(135deg, #fff 40%, var(--accent2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .brand-sub {
+        font-size: 0.78rem;
+        color: var(--muted);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-weight: 500;
+      }
+
+      /* Status badge */
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(16,185,129,0.1);
+        border: 1px solid rgba(16,185,129,0.25);
+        color: var(--success);
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 4px 12px;
+        border-radius: 100px;
+        margin-bottom: 28px;
+      }
+
+      .status-dot {
+        width: 6px;
+        height: 6px;
+        background: var(--success);
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(0.8); }
+      }
+
+      /* Step indicator */
+      .steps {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        margin-bottom: 28px;
+      }
+
+      .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        flex: 1;
+      }
+
+      .step-num {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+      }
+
+      .step.active .step-num {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+        box-shadow: 0 0 12px var(--accent-glow);
+      }
+
+      .step.done .step-num {
+        background: var(--success);
+        border-color: var(--success);
+        color: #fff;
+      }
+
+      .step-label {
+        font-size: 0.65rem;
+        color: var(--muted);
+        white-space: nowrap;
+        font-weight: 500;
+      }
+
+      .step.active .step-label { color: var(--text); }
+
+      .step-line {
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+        margin-bottom: 18px;
+      }
+
+      /* Label */
+      .field-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 8px;
+      }
+
+      /* Input */
+      .input-wrap {
+        position: relative;
+        margin-bottom: 16px;
+      }
+
+      .input-wrap input {
+        width: 100%;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        color: var(--text);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1rem;
+        font-weight: 600;
+        padding: 14px 48px 14px 16px;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        letter-spacing: 0.02em;
+      }
+
+      .input-wrap input::placeholder { color: var(--muted); font-weight: 400; }
+
+      .input-wrap input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
+      }
+
+      .input-icon {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--muted);
+        font-size: 1rem;
+        pointer-events: none;
+      }
+
+      /* Helper text */
+      .helper {
+        font-size: 0.72rem;
+        color: var(--muted);
+        margin-bottom: 20px;
+      }
+
+      /* Button */
+      .btn {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, var(--accent) 0%, #5b21b6 100%);
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        cursor: pointer;
+        text-transform: uppercase;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 16px var(--accent-glow);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .btn::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+
+      .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px var(--accent-glow); }
+      .btn:hover::after { opacity: 1; }
+      .btn:active { transform: translateY(0); }
+      .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+      /* Result area */
+      #result { margin-top: 24px; }
+
+      /* Loader */
+      .loader-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        padding: 20px 0;
+      }
+
+      .loader {
+        width: 36px;
+        height: 36px;
+        border: 3px solid rgba(124,58,237,0.2);
+        border-top: 3px solid var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      .loader-text {
+        font-size: 0.8rem;
+        color: var(--muted);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      /* Code display */
+      .code-box {
+        background: rgba(6,182,212,0.06);
+        border: 1px solid rgba(6,182,212,0.25);
+        border-radius: 14px;
+        padding: 24px;
+        text-align: center;
+        animation: fadeIn 0.4s ease;
+      }
+
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+      .code-label {
+        font-size: 0.7rem;
+        color: var(--accent2);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      .code-value {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 2.2rem;
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        color: #fff;
+        margin-bottom: 14px;
+        word-break: break-all;
+      }
+
+      .copy-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(6,182,212,0.12);
+        border: 1px solid rgba(6,182,212,0.3);
+        color: var(--accent2);
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 8px 20px;
+        border-radius: 100px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: 'Inter', sans-serif;
+      }
+
+      .copy-btn:hover { background: rgba(6,182,212,0.2); }
+
+      .code-hint {
+        font-size: 0.72rem;
+        color: var(--muted);
+        margin-top: 12px;
+        line-height: 1.5;
+      }
+
+      /* Alert boxes */
+      .alert {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        font-size: 0.82rem;
+        line-height: 1.5;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .alert-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+      .alert-error { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); color: #f87171; }
+      .alert-success { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); color: #34d399; }
+      .alert-warn { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); color: #fbbf24; }
+
+      /* Footer */
+      .footer {
+        margin-top: 28px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border);
+        text-align: center;
+      }
+
+      .footer-text { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.05em; }
+
+      /* Responsive */
+      @media (max-width: 480px) {
+        .card { padding: 28px 20px; }
+        .code-value { font-size: 1.7rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="brand">
+        <div class="brand-icon">👑</div>
+        <div class="brand-name">ALI RAZA BOT</div>
+        <div class="brand-sub">WhatsApp Bot Pairing</div>
+      </div>
+
+      <div style="text-align:center">
+        <span class="status-badge">
+          <span class="status-dot"></span>
+          System Active
+        </span>
+      </div>
+
+      <div class="steps">
+        <div class="step active" id="s1">
+          <div class="step-num">1</div>
+          <div class="step-label">Enter Number</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step" id="s2">
+          <div class="step-num">2</div>
+          <div class="step-label">Get Code</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step" id="s3">
+          <div class="step-num">3</div>
+          <div class="step-label">Link Device</div>
+        </div>
+      </div>
+
+      <div class="field-label">WhatsApp Number</div>
+      <div class="input-wrap">
+        <input type="tel" id="number" placeholder="+923001234567" autocomplete="off">
+        <span class="input-icon">📱</span>
+      </div>
+      <div class="helper">Include your country code (e.g. +92 for Pakistan)</div>
+
+      <button class="btn" id="pairBtn" onclick="getCode()">Generate Pairing Code</button>
+
+      <div id="result"></div>
+
+      <div class="footer">
+        <div class="footer-text">👑 ALI RAZA WHATSAPP BOT — Pair your device securely</div>
+      </div>
+    </div>
+
+    <script>
+      const btn = document.getElementById('pairBtn');
+      const result = document.getElementById('result');
+      const numInput = document.getElementById('number');
+
+      function setStep(n) {
+        for (let i = 1; i <= 3; i++) {
+          const el = document.getElementById('s' + i);
+          el.classList.remove('active', 'done');
+          if (i < n) el.classList.add('done');
+          if (i === n) el.classList.add('active');
+        }
+      }
+
+      async function getCode() {
+        const raw = numInput.value.trim();
+        const num = raw.replace(/[^0-9]/g, '');
+
+        if (!num || num.length < 10 || num.length > 15) {
+          result.innerHTML = `<div class="alert alert-error"><span class="alert-icon">⚠️</span><span>Please enter a valid number with country code (10–15 digits).</span></div>`;
+          numInput.focus();
+          return;
+        }
+
+        btn.disabled = true;
+        setStep(2);
+        result.innerHTML = `
+          <div class="loader-wrap">
+            <div class="loader"></div>
+            <div class="loader-text">Connecting to WhatsApp…</div>
+          </div>`;
+
+        try {
+          const res = await fetch('/code?number=' + encodeURIComponent(num));
+          const data = await res.json();
+
+          if (data.code) {
+            setStep(3);
+            result.innerHTML = `
+              <div class="code-box">
+                <div class="code-label">🔑 Your Pairing Code</div>
+                <div class="code-value" id="codeVal">${data.code}</div>
+                <button class="copy-btn" onclick="copyCode('${data.code}')">📋 Copy Code</button>
+                <div class="code-hint">Open WhatsApp → Linked Devices → Link a Device → Enter Code</div>
+              </div>`;
+            btn.disabled = false;
+          } else if (data.status === 'already_connected') {
+            setStep(3);
+            result.innerHTML = `<div class="alert alert-warn"><span class="alert-icon">ℹ️</span><span>This number is already connected. Use a different number or unlink first.</span></div>`;
+            btn.disabled = false;
+          } else if (data.error) {
+            setStep(1);
+            result.innerHTML = `<div class="alert alert-error"><span class="alert-icon">❌</span><span>${data.error}</span></div>`;
+            btn.disabled = false;
+          } else {
+            setStep(1);
+            result.innerHTML = `<div class="alert alert-error"><span class="alert-icon">❌</span><span>Failed to generate code. Please try again.</span></div>`;
+            btn.disabled = false;
+          }
+        } catch (e) {
+          setStep(1);
+          result.innerHTML = `<div class="alert alert-error"><span class="alert-icon">⚡</span><span>Server unreachable. Please refresh and try again.</span></div>`;
+          btn.disabled = false;
+        }
+      }
+
+      function copyCode(code) {
+        navigator.clipboard.writeText(code).then(() => {
+          const btn = document.querySelector('.copy-btn');
+          btn.textContent = '✅ Copied!';
+          setTimeout(() => { btn.textContent = '📋 Copy Code'; }, 1800);
+        });
+      }
+
+      numInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') getCode();
+      });
+    </script>
+  </body>
+  </html>
